@@ -1,5 +1,56 @@
 {
+  "name": "fantrax-scripts",
+  "version": "1.0.0",
+  "description": "Fantasy baseball tools for converting IBW text to CSV and matching prospects between different datasets",
+  "main": "src/lib/index.js",
+  "author": "Fantasy Baseball Analyst",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "bin": {
+    "ibw-convert": "./bin/ibw-convert",
+    "prospect-matcher": "./bin/prospect-matcher"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix",
+    "convert": "node src/cli/ibw-convert.js",
+    "match": "node src/cli/prospect-matcher.js",
+    "dev": "npm run lint && npm run test"
+  },
+  "keywords": [
+    "fantasy",
+    "baseball",
+    "csv",
+    "ibw",
+    "prospects",
+    "fantrax",
+    "data-processing"
+  ],
   "dependencies": {
-    "csv-parse": "^5.6.0"
-  }
+    "commander": "^14.0.0",
+    "csv-parse": "^6.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.32.0",
+    "jest": "^30.0.5"
+  },
+  "files": [
+    "src/",
+    "bin/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/user/fantrax-scripts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/user/fantrax-scripts/issues"
+  },
+  "homepage": "https://github.com/user/fantrax-scripts#readme"
 }
