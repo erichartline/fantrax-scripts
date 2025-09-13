@@ -65,7 +65,7 @@ program.action((options) => {
         .slice(0, 3)
         .map(
           (p) =>
-            `  ${p.number}. ${p.name} (${p.team}, ${p.position}, Age ${p.age})`
+            `  ${p.Number}. ${p.Player} (${p.Team}, ${p.Position}, Age ${p.Age})`
         );
       console.log("Sample converted entries:");
       sampleOutput.forEach((line) => console.log(line));

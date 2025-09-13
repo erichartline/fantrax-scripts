@@ -2,6 +2,8 @@
 
 > Fantasy baseball tools for converting IBW text to CSV and matching prospects between different datasets
 
+**⚠️ Note: This package is not published to npm. You must clone and run it locally.**
+
 ## Overview
 
 Fantrax Scripts is a collection of Node.js tools designed to help fantasy baseball analysts work with player data from different sources. The toolkit provides two main functions:
@@ -20,26 +22,50 @@ Fantrax Scripts is a collection of Node.js tools designed to help fantasy baseba
 
 ## Installation
 
-### Global Installation (Recommended)
-
-```bash
-npm install -g fantrax-scripts
-```
-
-After global installation, you can use the commands anywhere:
-
-```bash
-ibw-convert --help
-prospect-matcher --help
-```
-
-### Local Installation
+Since this package is not published to npm, you'll need to clone and install it locally:
 
 ```bash
 git clone https://github.com/user/fantrax-scripts.git
 cd fantrax-scripts
 npm install
 ```
+
+## Running the Scripts
+
+After installation, you can run the scripts in several ways:
+
+### Option 1: Using npm scripts (Recommended)
+
+```bash
+# Convert IBW text to CSV
+npm run convert -- -i players.txt -o players.csv
+
+# Match prospects between datasets
+npm run match -- -f fantrax-players.csv -i ibw-prospects.csv -o matches.csv
+```
+
+### Option 2: Using Node directly
+
+```bash
+# Convert IBW text to CSV
+node src/cli/ibw-convert.js -i players.txt -o players.csv
+
+# Match prospects between datasets
+node src/cli/prospect-matcher.js -f fantrax-players.csv -i ibw-prospects.csv -o matches.csv
+```
+
+### Option 3: Using the bin scripts (if you have execute permissions)
+
+```bash
+# Make scripts executable (one-time setup)
+chmod +x bin/ibw-convert bin/prospect-matcher
+
+# Run the scripts
+./bin/ibw-convert -i players.txt -o players.csv
+./bin/prospect-matcher -f fantrax-players.csv -i ibw-prospects.csv -o matches.csv
+```
+
+**Note:** The `--` after `npm run` is important - it passes the arguments to the underlying script.
 
 ## Usage
 
@@ -48,7 +74,7 @@ npm install
 Convert IBW text files to CSV format:
 
 ```bash
-ibw-convert -i players.txt -o players.csv
+npm run convert -- -i players.txt -o players.csv
 ```
 
 #### Options
@@ -63,13 +89,13 @@ ibw-convert -i players.txt -o players.csv
 
 ```bash
 # Basic conversion
-ibw-convert -i prospects-2024.txt -o prospects-2024.csv
+npm run convert -- -i prospects-2024.txt -o prospects-2024.csv
 
 # With custom headers
-ibw-convert -i prospects.txt -o prospects.csv --headers "Rank,Name,Team,Pos,Age"
+npm run convert -- -i prospects.txt -o prospects.csv --headers "Rank,Name,Team,Pos,Age"
 
 # With validation
-ibw-convert -i prospects.txt -o prospects.csv --validate
+npm run convert -- -i prospects.txt -o prospects.csv --validate
 ```
 
 #### Expected IBW Text Format
@@ -88,7 +114,7 @@ Pattern: `number) name - team, position, age. description...`
 Match players between Fantrax and IBW CSV files:
 
 ```bash
-prospect-matcher -f fantrax-players.csv -i ibw-prospects.csv -o matches.csv
+npm run match -- -f fantrax-players.csv -i ibw-prospects.csv -o matches.csv
 ```
 
 #### Options
@@ -109,15 +135,15 @@ prospect-matcher -f fantrax-players.csv -i ibw-prospects.csv -o matches.csv
 
 ```bash
 # Basic matching
-prospect-matcher -f my-league.csv -i prospects.csv -o matches.csv
+npm run match -- -f my-league.csv -i prospects.csv -o matches.csv
 
 # With custom column mappings
-prospect-matcher -f league.csv -i prospects.csv -o matches.csv \
+npm run match -- -f league.csv -i prospects.csv -o matches.csv \
   --fantrax-player-col "PlayerName" --fantrax-team-col "TeamAbbr" \
   --ibw-player-col "Name" --ibw-team-col "Team"
 
 # Troubleshooting with samples
-prospect-matcher -f league.csv -i prospects.csv -o matches.csv --show-samples --verbose
+npm run match -- -f league.csv -i prospects.csv -o matches.csv --show-samples --verbose
 ```
 
 #### Matching Strategies
@@ -326,7 +352,11 @@ npm run test:coverage
 
 ### Getting Help
 
-1. Use `--help` flag with any command
+1. Use `--help` flag with any command:
+   ```bash
+   npm run convert -- --help
+   npm run match -- --help
+   ```
 2. Check the troubleshooting section above
 3. Review the test files for usage examples
 4. Open an issue on the GitHub repository

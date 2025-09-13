@@ -45,6 +45,52 @@ function readCSV(filePath, options = {}) {
 }
 
 /**
+ * Reads and parses a CSV file with custom column mapping for IBW format
+ * @param {string} filePath - Path to the CSV file
+ * @returns {Array} Array of objects representing CSV rows
+ */
+function readIBWCSV(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, "utf-8");
+    const records = parse(content, {
+      columns: false,
+      skip_empty_lines: true,
+      trim: true,
+    });
+
+    if (records.length === 0) {
+      throw new Error(
+        `CSV file is empty or contains no valid data: ${filePath}`
+      );
+    }
+
+    // Convert to objects with proper column names and filter out FYPD entries
+    return records
+      .filter((row) => {
+        // Filter out FYPD entries - they have "FYPD-X" in column 2
+        return !row[2] || !row[2].toString().includes('FYPD');
+      })
+      .map((row, index) => ({
+        "0": row[0], // Overall rank
+        "1": row[1], // Secondary rank
+        "2": row[2], // Tertiary rank
+        "3": row[3], // Some other data
+        "4": row[4], // More data
+        "5": row[5], // Player name
+        "6": row[6], // Team
+        "7": row[7], // Position
+        "8": row[8], // Age
+        "9": row[9], // Description
+      }));
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      throw new Error(`CSV file not found: ${filePath}`);
+    }
+    throw error;
+  }
+}
+
+/**
  * Converts an array of objects to CSV format
  * @param {Array} objects - Array of objects to convert
  * @param {Array} headers - Optional array of header names. If not provided, uses object keys
@@ -153,6 +199,7 @@ function getColumnByIndex(csvData, columnIndex) {
 
 module.exports = {
   readCSV,
+  readIBWCSV,
   objectsToCSV,
   writeCSV,
   validateHeaders,

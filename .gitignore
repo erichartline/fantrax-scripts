@@ -68,3 +68,7 @@ build/
 *.tgz
 package-lock.json
 yarn.lock
+
+# Files
+*.csv
+*.txt

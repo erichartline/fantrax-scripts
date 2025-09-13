@@ -36,9 +36,9 @@ function findMatches(fantraxPlayers, ibwPlayers, columnMapping = {}) {
     throw new Error("IBW players must be a non-empty array");
   }
 
-  // Validate required columns exist
-  validateColumns(fantraxPlayers[0], Object.values(mapping.fantrax), "Fantrax");
-  validateColumns(ibwPlayers[0], Object.values(mapping.ibw), "IBW");
+  // Validate required columns exist (filter out null values)
+  validateColumns(fantraxPlayers[0], Object.values(mapping.fantrax).filter(col => col !== null), "Fantrax");
+  validateColumns(ibwPlayers[0], Object.values(mapping.ibw).filter(col => col !== null), "IBW");
 
   // Create lookup maps for efficient matching
   const fantraxPlayersMap = createPlayerMaps(fantraxPlayers, mapping.fantrax);
@@ -149,19 +149,33 @@ function createMatchKey(playerName, teamName = "") {
 }
 
 /**
- * Gets field value from object, handling multiple possible column names
- * @param {Object} obj - Object to get value from
- * @param {string|Array} fieldName - Field name or array of possible field names
+ * Gets field value from object or array, handling multiple possible column names
+ * @param {Object|Array} obj - Object or array to get value from
+ * @param {string|Array} fieldName - Field name, array index, or array of possible field names
  * @returns {string} Field value or empty string
  */
 function getFieldValue(obj, fieldName) {
   if (Array.isArray(fieldName)) {
     for (const name of fieldName) {
-      if (obj[name] !== undefined && obj[name] !== null) {
-        return String(obj[name]).trim();
+      if (Array.isArray(obj)) {
+        const index = parseInt(name, 10);
+        if (obj[index] !== undefined && obj[index] !== null) {
+          return String(obj[index]).trim();
+        }
+      } else {
+        if (obj[name] !== undefined && obj[name] !== null) {
+          return String(obj[name]).trim();
+        }
       }
     }
     return "";
+  }
+
+  if (Array.isArray(obj)) {
+    const index = parseInt(fieldName, 10);
+    return obj[index] !== undefined && obj[index] !== null
+      ? String(obj[index]).trim()
+      : "";
   }
 
   return obj[fieldName] !== undefined && obj[fieldName] !== null
@@ -171,22 +185,31 @@ function getFieldValue(obj, fieldName) {
 
 /**
  * Validates that required columns exist in the data
- * @param {Object} sampleRecord - Sample record to check columns
- * @param {Array} requiredColumns - Array of required column names
+ * @param {Object|Array} sampleRecord - Sample record to check columns
+ * @param {Array} requiredColumns - Array of required column names/indices
  * @param {string} dataType - Type of data (for error messages)
  */
 function validateColumns(sampleRecord, requiredColumns, dataType) {
-  const availableColumns = Object.keys(sampleRecord);
-  const missingColumns = requiredColumns.filter(
-    (col) => !availableColumns.some((available) => available === col)
-  );
-
-  if (missingColumns.length > 0) {
-    throw new Error(
-      `Missing required columns in ${dataType} data: ${missingColumns.join(
-        ", "
-      )}. Available columns: ${availableColumns.join(", ")}`
+  if (Array.isArray(sampleRecord)) {
+    const maxIndex = Math.max(...requiredColumns.map(col => parseInt(col, 10)));
+    if (maxIndex >= sampleRecord.length) {
+      throw new Error(
+        `Missing required columns in ${dataType} data: column index ${maxIndex} not found. Available columns: 0-${sampleRecord.length - 1}`
+      );
+    }
+  } else {
+    const availableColumns = Object.keys(sampleRecord);
+    const missingColumns = requiredColumns.filter(
+      (col) => !availableColumns.some((available) => available === col)
     );
+
+    if (missingColumns.length > 0) {
+      throw new Error(
+        `Missing required columns in ${dataType} data: ${missingColumns.join(
+          ", "
+        )}. Available columns: ${availableColumns.join(", ")}`
+      );
+    }
   }
 }
 
@@ -208,7 +231,8 @@ function formatMatchResults(matches, columnMapping) {
         columnMapping.fantrax.number,
         "Number",
         "#",
-      ]),
+        "ID"
+      ].filter(col => col !== null)),
       "Fantrax Player": getFieldValue(
         fantraxData,
         columnMapping.fantrax.player
@@ -218,8 +242,8 @@ function formatMatchResults(matches, columnMapping) {
         columnMapping.fantrax.position,
         "Position",
         "Pos",
-      ]),
-      "Fantrax Age": getFieldValue(fantraxData, columnMapping.fantrax.age),
+      ].filter(col => col !== null)),
+      "Fantrax Age": getFieldValue(fantraxData, columnMapping.fantrax.age || "Age"),
       "Match Type": matchType,
     };
   });

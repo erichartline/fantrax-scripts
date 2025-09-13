@@ -25,13 +25,23 @@ function parseIBWText(textContent) {
 
   lines.forEach((line, index) => {
     // Improved regex pattern to handle edge cases like multi-word team names
-    // Pattern: number) name - team, position, age
+    // Pattern: number) (optional parentheses with numbers) name - team, position, age
     const basicInfoMatch = line.match(
-      /^(\d+)\)\s*([^-]+)-\s*([^,]+),\s*([^,]+),\s*(\d+\.?\d*)/
+      /^(\d+)\)\s*(?:\([^)]*\)\s*)*([A-Za-z][^-]+?)\s*-\s*([^,]+),\s*([^,]+),\s*(\d+\.?\d*)/
     );
 
     if (basicInfoMatch) {
       const [, number, name, team, position, age] = basicInfoMatch;
+
+      // Skip players with FYPD patterns (First Year Player Draft prospects)
+      if (line.includes("FYPD-")) {
+        skippedLines.push({
+          line: index + 1,
+          content: line,
+          reason: "FYPD player - excluded as requested",
+        });
+        return;
+      }
 
       // Validate extracted data
       if (!name.trim() || !team.trim() || !position.trim()) {
@@ -44,11 +54,11 @@ function parseIBWText(textContent) {
       }
 
       players.push({
-        number: parseInt(number, 10),
-        name: name.trim(),
-        team: team.trim(),
-        position: position.trim(),
-        age: parseFloat(age),
+        Number: parseInt(number, 10),
+        Player: name.trim(),
+        Team: team.trim(),
+        Position: position.trim(),
+        Age: parseFloat(age),
       });
     } else {
       skippedLines.push({
